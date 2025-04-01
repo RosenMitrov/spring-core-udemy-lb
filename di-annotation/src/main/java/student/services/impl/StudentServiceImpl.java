@@ -1,21 +1,28 @@
 package student.services.impl;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import student.model.Student;
 import student.repository.StudentRepository;
 import student.services.StudentService;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StudentServiceImpl implements StudentService {
 
 
     private final StudentRepository studentRepository;
+    private final String message;
 
     @Autowired
-    public StudentServiceImpl(@Qualifier("inMemoryRepository") StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
+    public StudentServiceImpl(List<StudentRepository> studentRepositories,
+                              @Value("${init.message}") String message) {
+        this.studentRepository = new CompositeStudentRepository(studentRepositories);
+        this.message = message;
     }
 
     @Override
@@ -26,8 +33,31 @@ public class StudentServiceImpl implements StudentService {
                 .orElse(null);
     }
 
+    static class CompositeStudentRepository implements StudentRepository {
+
+        private final List<StudentRepository> studentRepositories;
+
+        public CompositeStudentRepository(List<StudentRepository> studentRepositories) {
+            this.studentRepositories = studentRepositories;
+        }
+
+        @Override
+        public List<Student> getAllStudents() {
+            return studentRepositories
+                    .stream()
+                    .flatMap(sr -> sr.getAllStudents().stream())
+                    .toList();
+        }
+
+        @Override
+        public long count() {
+            return getAllStudents().size();
+        }
+    }
+
     @Override
+    @PostConstruct
     public void init() {
-        System.out.println("The service manages " + +studentRepository.count() + " students.");
+        System.out.printf(message, studentRepository.count());
     }
 }

@@ -18,6 +18,10 @@
           class="student.repository.impl.InMemoryRepository">
     </bean>
 
+    <bean id="appConfig"
+          class="student.config.AppConfig">
+    </bean>
+
     <bean id="studentService"
           class="student.services.impl.StudentServiceImpl">
 

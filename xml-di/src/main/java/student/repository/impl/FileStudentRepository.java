@@ -21,6 +21,11 @@ public class FileStudentRepository implements StudentRepository {
                 .toList();
     }
 
+    @Override
+    public long count() {
+        return getAllStudents().size();
+    }
+
     private Student asStudent(String line) {
         String[] lineData = line.split(",");
         return new Student(lineData[0].trim(), LocalDate.parse(lineData[1].trim()));

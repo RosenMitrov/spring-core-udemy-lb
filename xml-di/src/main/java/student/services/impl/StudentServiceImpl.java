@@ -22,4 +22,9 @@ public class StudentServiceImpl implements StudentService {
                 .max(Comparator.comparing(Student::birthDay))
                 .orElse(null);
     }
+
+    @Override
+    public void init() {
+        System.out.println("The service manages " + + studentRepository.count() +" students.");
+    }
 }
